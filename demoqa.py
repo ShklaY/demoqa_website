@@ -38,6 +38,7 @@ class InitPage(Base):
 
 
 class HeaderSection(Base):
+    """хедер сайту: містить локатори веб елементів та методи для взаємодії з ними"""
     header = 'div[class="main-header"]'
 
     def get_header_name(self):
@@ -45,6 +46,7 @@ class HeaderSection(Base):
 
 
 class MenuBar(Base):
+    """панель меню: містить локатори веб елементів та методи для взаємодії з ними"""
     menu_btn_text_box = '//span[text()="Text Box"]'
     menu_btn_check_box = '//span[text()="Check Box"]'
     menu_btn_radio_button = '//span[text()="Radio Button"]'
@@ -55,6 +57,7 @@ class MenuBar(Base):
 
 
 class ElementsPage(Base):
+    """сторінка Elements"""
     header = HeaderSection()
     menu = MenuBar()
 
@@ -78,12 +81,16 @@ class TestBase:
 class TestElements(TestBase):
     def test_text_box(self):
         self.open_site()
+        """відкрилась URL"""
         time.sleep(3)
         InitPage().click_on_btn_elements()
+        """відклилась стрінка Elements"""
         time.sleep(3)
         ElementsPage().menu.click_on_btn_text_box()
+        """відкрилась стрінка TextBox після кліку на кнпку text_box в меню на стрінці Elements"""
         time.sleep(3)
         header_name_text_box_pg = TextBoxPage().header.get_header_name()
+        """перевірка тайтлу сторінки: """
         assert header_name_text_box_pg == 'Text Box'
 
 

@@ -1,5 +1,6 @@
 import time
 from selenium import webdriver
+from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
@@ -27,6 +28,13 @@ class Base:
     def wait_for_visibility_of_all_elements(self, by, element_locator):
         """Цей метод очікує, поки ЕЛЕМЕНТИ стануть видимии на стрінці"""
         return self.wait.until(EC.visibility_of_all_elements_located((by, element_locator)))
+
+    def scroll_to_web_element(self, by, element_locator):
+        return ActionChains(self.driver).move_to_element(self.driver.find_element(by, element_locator)).move_by_offset(0, 50).perform()
+
+    def remove_advertising_in_footer(self):
+        self.driver.execute_script('document.getElementById("adplus-anchor").remove();')
+        self.driver.execute_script('document.getElementsByTagName("footer")[0].remove();')
 
 
 class InitPage(Base):
@@ -66,6 +74,30 @@ class TextBoxPage(Base):
     header = HeaderSection()
     menu = MenuBar()
 
+    txt_full_name = 'input[id="userName"]'
+    txt_email = 'input[id="userEmail"]'
+    txt_current_address = 'textarea[id="currentAddress"]'
+    txt_permanent_address = 'textarea[id="permanentAddress"]'
+    btn_submit = 'button[id="submit"]'
+
+    def set_full_name(self):
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, TextBoxPage.txt_full_name).send_keys('Wr2*ьЦ')
+
+    def set_email(self):
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, TextBoxPage.txt_email).send_keys('putin_huilo@gmail.com')
+
+    def set_current_address(self):
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, TextBoxPage.txt_current_address).send_keys('Wr2*ьЦ')
+
+    def set_permanent_address(self):
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, TextBoxPage.txt_permanent_address).send_keys('Wr2*ьЦ')
+
+    def scroll_to_btn_submit(self):
+        self.scroll_to_web_element(By.CSS_SELECTOR, TextBoxPage.btn_submit)
+
+    def click_on_btn_submit(self):
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, TextBoxPage.btn_submit).click()
+
 
 class TestBase:
     base = Base()
@@ -82,15 +114,28 @@ class TestElements(TestBase):
     def test_text_box(self):
         self.open_site()
         """відкрилась URL"""
-        time.sleep(3)
         InitPage().click_on_btn_elements()
         """відклилась стрінка Elements"""
-        time.sleep(3)
         ElementsPage().menu.click_on_btn_text_box()
         """відкрилась стрінка TextBox після кліку на кнпку text_box в меню на стрінці Elements"""
         time.sleep(3)
-        header_name_text_box_pg = TextBoxPage().header.get_header_name()
+        textbox_pg = TextBoxPage()
+        header_name_text_box_pg = textbox_pg.header.get_header_name()
         """перевірка тайтлу сторінки: """
         assert header_name_text_box_pg == 'Text Box'
+        """заповнення полей: ім'я, емейл, адреса та клік submit"""
+        textbox_pg.set_full_name()
+        textbox_pg.set_email()
+        textbox_pg.set_current_address()
+        textbox_pg.set_permanent_address()
+        time.sleep(4)
+        textbox_pg.remove_advertising_in_footer()
+        time.sleep(6)
+        textbox_pg.scroll_to_btn_submit()
+        time.sleep(4)
+        textbox_pg.click_on_btn_submit()
+        time.sleep(4)
+        self.close_site()
+
 
 

@@ -31,19 +31,14 @@ class Base:
         """Цей метод очікує, поки ЕЛЕМЕНТИ стануть видимии на стрінці"""
         return self.wait.until(EC.visibility_of_all_elements_located((by, element_locator)))
 
-    def scroll_to_web_element(self, by, element_locator):
-        # .move_by_offset(0, 50) - цим мтдом переміщаю додтково курсор миші вниз на 50 пікселів від поточнго положення
-        # Цей код спершу переміщує курсор миші до заданого ел-та, а потім переміщує його вниз на 50 пікселів від поточного положення елемента.
-        return ActionChains(self.driver).move_to_element(self.driver.find_element(by, element_locator)).move_by_offset(0, 50).perform()
-
-    def scroll_into_view(self, wait_for_):
+    def scroll_js(self, wait_for_):
+        """Цей метод переміщує курсор миші до заданого ел-та за доп JS"""
         self.driver.execute_script("arguments[0].scrollIntoView();", wait_for_)
 
     def remove_advertising_in_footer(self):
+        """Цей метод видаляє рекламу в футері"""
         self.driver.execute_script('document.getElementById("adplus-anchor").remove();')
         self.driver.execute_script('document.getElementsByTagName("footer")[0].remove();')
-        # [0] - він туть тому що метод getElementsByTagName - поверт список елмнтів ElementS!
-        # і з цього спску беру 0-вий (1-ший), навіть якшо він єдиний в списку
 
 
 class InitPage(Base):
@@ -79,7 +74,16 @@ class ElementsPage(Base):
     menu = MenuBar()
 
 
+class FakeData:
+    fake = Faker(locale='uk_UA')
+    fake_full_name = fake.name()
+    fake_email = fake.email()
+    fake_current_address = fake.address()
+    fake_permanent_address = fake.address()
+
+
 class TextBoxPage(Base):
+    """сторінка Text Box: містить локатори веб елементів та методи для взаємодії з ними"""
     header = HeaderSection()
     menu = MenuBar()
 
@@ -89,36 +93,48 @@ class TextBoxPage(Base):
     txt_permanent_address = 'textarea[id="permanentAddress"]'
     btn_submit = 'button[id="submit"]'
 
-    fake = Faker(locale='uk_UA')
-    fake_full_name = fake.name()
-    fake_email = fake.email()
-    fake_current_address = fake.address()
-    fake_permanent_address = fake.address()
-
+    output_full_name = 'p[id="name"]'
+    output_email = 'p[id="email"]'
+    output_current_address = 'p[id="currentAddress"]'
+    output_permanent_address = 'p[id="permanentAddress"]'
 
     def set_full_name(self):
-        self.wait_for_visibility_of_el(By.CSS_SELECTOR, TextBoxPage.txt_full_name).send_keys(TextBoxPage.fake_full_name)
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, TextBoxPage.txt_full_name).send_keys(FakeData.fake_full_name)
 
     def set_email(self):
-        self.wait_for_visibility_of_el(By.CSS_SELECTOR, TextBoxPage.txt_email).send_keys(TextBoxPage.fake_email)
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, TextBoxPage.txt_email).send_keys(FakeData.fake_email)
 
     def set_current_address(self):
-        self.wait_for_visibility_of_el(By.CSS_SELECTOR, TextBoxPage.txt_current_address).send_keys(TextBoxPage.fake_current_address)
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, TextBoxPage.txt_current_address).send_keys(FakeData.fake_current_address)
 
     def set_permanent_address(self):
-        self.wait_for_visibility_of_el(By.CSS_SELECTOR, TextBoxPage.txt_permanent_address).send_keys(TextBoxPage.fake_permanent_address)
-
-    # def scroll_to_btn_submit(self):
-    #     self.scroll_to_web_element(By.CSS_SELECTOR, TextBoxPage.btn_submit)
-    #
-    # def click_on_btn_submit(self):
-    #     self.wait_for_visibility_of_el(By.CSS_SELECTOR, TextBoxPage.btn_submit).click()
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, TextBoxPage.txt_permanent_address).send_keys(FakeData.fake_permanent_address)
 
     def scroll_and_click_on_btn_submit(self):
-        p = self.wait_for_visibility_of_el(By.CSS_SELECTOR, TextBoxPage.btn_submit)
-        self.scroll_into_view(p)
-        time.sleep(6)
-        p.click()
+        button_submit = self.wait_for_visibility_of_el(By.CSS_SELECTOR, TextBoxPage.btn_submit)
+        self.scroll_js(button_submit)
+        time.sleep(2)
+        button_submit.click()
+
+    def get_output_full_name(self):
+        full_name = self.wait_for_visibility_of_el(By.CSS_SELECTOR, TextBoxPage.output_full_name).text
+        split_full_name = full_name.split(sep=':')
+        return split_full_name[1]
+
+    def get_output_email(self):
+        email = self.wait_for_visibility_of_el(By.CSS_SELECTOR, TextBoxPage.output_email).text
+        split_email = email.split(sep=':')
+        return split_email[1]
+
+    def get_output_current_address(self):
+        current_address = self.wait_for_visibility_of_el(By.CSS_SELECTOR, TextBoxPage.output_current_address).text
+        split_current_address = current_address.split(sep=':')
+        return split_current_address[1]
+
+    def get_output_permanent_address(self):
+        permanent_address = self.wait_for_visibility_of_el(By.CSS_SELECTOR, TextBoxPage.output_permanent_address).text
+        split_permanent_address = permanent_address.split(sep=':')
+        return split_permanent_address[1]
 
 
 class TestBase:
@@ -150,14 +166,18 @@ class TestElements(TestBase):
         textbox_pg.set_email()
         textbox_pg.set_current_address()
         textbox_pg.set_permanent_address()
-        time.sleep(4)
         textbox_pg.remove_advertising_in_footer()
-        time.sleep(6)
-        # textbox_pg.scroll_to_btn_submit()
-        # time.sleep(4)
-        # textbox_pg.click_on_btn_submit()
         textbox_pg.scroll_and_click_on_btn_submit()
-        time.sleep(4)
+        """поміщаю в змінні вихідні дані: ім'я, емейл, адреси"""
+        output_full_name = textbox_pg.get_output_full_name()
+        output_email = textbox_pg.get_output_email()
+        output_current_address = textbox_pg.get_output_current_address()
+        output_permanent_address = textbox_pg.get_output_permanent_address()
+
+        assert output_full_name == FakeData.fake_full_name
+        assert output_email == FakeData.fake_email
+        assert output_current_address == FakeData.fake_current_address
+        assert output_permanent_address == FakeData.fake_permanent_address
         # self.close_site()
 
 

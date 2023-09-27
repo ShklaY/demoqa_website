@@ -1,8 +1,7 @@
+import random
 import time
-
 from faker import Faker
 from selenium import webdriver
-from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
@@ -66,6 +65,9 @@ class MenuBar(Base):
 
     def click_on_btn_text_box(self):
         self.wait_for_visibility_of_el(By.XPATH, MenuBar.menu_btn_text_box).click()
+
+    def click_on_btn_check_box(self):
+        self.wait_for_visibility_of_el(By.XPATH, MenuBar.menu_btn_check_box).click()
 
 
 class ElementsPage(Base):
@@ -137,6 +139,45 @@ class TextBoxPage(Base):
         return split_permanent_address[1]
 
 
+class CheckBoxPage(Base):
+    """сторінка Check Box: містить локатори веб елементів та методи для взаємодії з ними"""
+    header = HeaderSection()
+    menu = MenuBar()
+
+    btn_expand_all = 'button[title="Expand all"]'
+    titles_of_checkboxes = '[class="rct-title"]'
+
+    def click_on_btn_expand_all(self):
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, CheckBoxPage.btn_expand_all).click()
+
+    def click_on_random_checkboxes(self):
+        """Клік рандомну непарну к-сть разів на рандомні чекбокси"""
+        list_of_all_checkboxes = self.wait_for_visibility_of_all_elements(By.CSS_SELECTOR, CheckBoxPage.titles_of_checkboxes)
+        for i in range(3, 9, 2):
+            random_number = random.randint(1, 16)
+            random_checkbox = list_of_all_checkboxes[random_number]
+            self.scroll_js(random_checkbox)
+            random_checkbox.click()
+
+    def get_titles_of_checked_checkboxes(self):
+        """цей метод повертає назви всіх відмічених чекбоксів"""
+        checked_checkboxes = self.wait_for_visibility_of_all_elements(By.CSS_SELECTOR, '[class="rct-icon rct-icon-check"]')
+        ancestor_for_checked_checkboxes = './/ancestor::span[@class="rct-text"]'
+        titles_of_checked_checkboxes = []
+        for i in checked_checkboxes:
+            find_ancestor = i.find_element(By.XPATH, ancestor_for_checked_checkboxes)
+            titles_of_checked_checkboxes.append(find_ancestor.text.lower())
+        return titles_of_checked_checkboxes
+
+    def get_output_result(self):
+        """цей метод повертає назви чекбоксів, що виводяться в рядку 'You have selected' """
+        row_of_selected_checkboxes = self.wait_for_visibility_of_all_elements(By.XPATH, '//div/span[@class="text-success"]')
+        list_of_selected_checkboxes = []
+        for i in row_of_selected_checkboxes:
+            list_of_selected_checkboxes.append(i.text.lower())
+        return list_of_selected_checkboxes
+
+
 class TestBase:
     base = Base()
 
@@ -158,9 +199,9 @@ class TestElements(TestBase):
         """відкрилась стрінка TextBox після кліку на кнпку text_box в меню на стрінці Elements"""
         time.sleep(3)
         textbox_pg = TextBoxPage()
-        header_name_text_box_pg = textbox_pg.header.get_header_name()
+        textbox_pg_header_name = textbox_pg.header.get_header_name()
         """перевірка тайтлу сторінки: """
-        assert header_name_text_box_pg == 'Text Box'
+        assert textbox_pg_header_name == 'Text Box'
         """заповнення полей: ім'я, емейл, адреса та клік submit"""
         textbox_pg.set_full_name()
         textbox_pg.set_email()
@@ -180,5 +221,27 @@ class TestElements(TestBase):
         assert output_permanent_address == FakeData.fake_permanent_address
         # self.close_site()
 
+    def test_check_box(self):
+        self.open_site()
+        InitPage().click_on_btn_elements()
+        ElementsPage().menu.click_on_btn_check_box()
+        time.sleep(3)
+        checkbox_pg = CheckBoxPage()
+        checkbox_pg_header_name = checkbox_pg.header.get_header_name()
+        """перевірка тайтлу сторінки: """
+        assert checkbox_pg_header_name == 'Check Box'
+        checkbox_pg.click_on_btn_expand_all()
+        time.sleep(2)
+        checkbox_pg.click_on_random_checkboxes()
+        time.sleep(2)
+        """назви всіх відмічених чекбоксів"""
+        titles_of_checked_checkboxes = checkbox_pg.get_titles_of_checked_checkboxes()
+        """назви чекбоксів, що виводяться в рядку 'You have selected' """
+        output_result = checkbox_pg.get_output_result()
+
+        print(titles_of_checked_checkboxes)
+
+        print(output_result)
+        # self.close_site()
 
 

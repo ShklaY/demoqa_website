@@ -166,7 +166,7 @@ class CheckBoxPage(Base):
         titles_of_checked_checkboxes = []
         for i in checked_checkboxes:
             find_ancestor = i.find_element(By.XPATH, ancestor_for_checked_checkboxes)
-            titles_of_checked_checkboxes.append(find_ancestor.text.lower())
+            titles_of_checked_checkboxes.append(find_ancestor.text.lower().replace(".doc", '').replace(" ", ''))
         return titles_of_checked_checkboxes
 
     def get_output_result(self):
@@ -174,7 +174,7 @@ class CheckBoxPage(Base):
         row_of_selected_checkboxes = self.wait_for_visibility_of_all_elements(By.XPATH, '//div/span[@class="text-success"]')
         list_of_selected_checkboxes = []
         for i in row_of_selected_checkboxes:
-            list_of_selected_checkboxes.append(i.text.lower())
+            list_of_selected_checkboxes.append(i.text.lower().replace(" ", ''))
         return list_of_selected_checkboxes
 
 
@@ -190,7 +190,7 @@ class TestBase:
 
 
 class TestElements(TestBase):
-    def test_text_box(self):
+    def test_text_box_page(self):
         self.open_site()
         """відкрилась URL"""
         InitPage().click_on_btn_elements()
@@ -221,7 +221,7 @@ class TestElements(TestBase):
         assert output_permanent_address == FakeData.fake_permanent_address
         # self.close_site()
 
-    def test_check_box(self):
+    def test_check_box_page(self):
         self.open_site()
         InitPage().click_on_btn_elements()
         ElementsPage().menu.click_on_btn_check_box()
@@ -239,9 +239,7 @@ class TestElements(TestBase):
         """назви чекбоксів, що виводяться в рядку 'You have selected' """
         output_result = checkbox_pg.get_output_result()
 
-        print(titles_of_checked_checkboxes)
-
-        print(output_result)
+        assert titles_of_checked_checkboxes == output_result
         # self.close_site()
 
 

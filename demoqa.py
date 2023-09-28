@@ -69,6 +69,9 @@ class MenuBar(Base):
     def click_on_btn_check_box(self):
         self.wait_for_visibility_of_el(By.XPATH, MenuBar.menu_btn_check_box).click()
 
+    def click_on_btn_radio_button(self):
+        self.wait_for_visibility_of_el(By.XPATH, MenuBar.menu_btn_radio_button).click()
+
 
 class ElementsPage(Base):
     """сторінка Elements"""
@@ -178,6 +181,22 @@ class CheckBoxPage(Base):
         return list_of_selected_checkboxes
 
 
+class RadioButtonPage(Base):
+    header = HeaderSection()
+    btn_radio = 'label[class="custom-control-label"]'
+    output_text = '[class="text-success"]'
+
+    def click_on_random_radio_button(self):
+        list_of_radio_buttons = self.wait_for_visibility_of_all_elements(By.CSS_SELECTOR, RadioButtonPage.btn_radio)
+        random_radio_btn = list_of_radio_buttons[random.randint(0, 1)]
+        random_radio_btn.click()
+        title_of_random_radio_btn = random_radio_btn.text
+        return title_of_random_radio_btn
+
+    def get_output_text(self):
+        return self.wait_for_visibility_of_el(By.CSS_SELECTOR, RadioButtonPage.output_text).text
+
+
 class TestBase:
     base = Base()
 
@@ -242,4 +261,20 @@ class TestElements(TestBase):
         assert titles_of_checked_checkboxes == output_result
         # self.close_site()
 
+    def test_radio_button_page(self):
+        self.open_site()
+        InitPage().click_on_btn_elements()
+        ElementsPage().menu.click_on_btn_radio_button()
+        radiobutton_pg = RadioButtonPage()
+        radiobutton_pg_header_name = radiobutton_pg.header.get_header_name()
+        assert radiobutton_pg_header_name == 'Radio Button'
+
+        title_of_random_radio_btn = radiobutton_pg.click_on_random_radio_button()
+        print(title_of_random_radio_btn, end="   /////   ")
+
+        output_text = radiobutton_pg.get_output_text()
+        print(output_text)
+
+        assert title_of_random_radio_btn == output_text
+        # self.close_site()
 

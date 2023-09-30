@@ -2,6 +2,7 @@ import random
 import time
 from faker import Faker
 from selenium import webdriver
+from selenium.common import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
@@ -183,14 +184,15 @@ class CheckBoxPage(Base):
 
 class RadioButtonPage(Base):
     header = HeaderSection()
-    btn_radio = 'label[class="custom-control-label"]'
+    radio_buttons = "//label[contains(@class, 'custom-control-label')]"
     output_text = '[class="text-success"]'
 
     def click_on_random_radio_button(self):
-        list_of_radio_buttons = self.wait_for_visibility_of_all_elements(By.CSS_SELECTOR, RadioButtonPage.btn_radio)
-        random_radio_btn = list_of_radio_buttons[random.randint(0, 1)]
-        random_radio_btn.click()
+        list_of_radio_buttons = self.wait_for_visibility_of_all_elements(By.XPATH, RadioButtonPage.radio_buttons)
+        random_radio_btn = list_of_radio_buttons[random.randint(0, 2)]
         title_of_random_radio_btn = random_radio_btn.text
+        if title_of_random_radio_btn != "No":
+            random_radio_btn.click()
         return title_of_random_radio_btn
 
     def get_output_text(self):
@@ -270,11 +272,14 @@ class TestElements(TestBase):
         assert radiobutton_pg_header_name == 'Radio Button'
 
         title_of_random_radio_btn = radiobutton_pg.click_on_random_radio_button()
-        print(title_of_random_radio_btn, end="   /////   ")
+        print(title_of_random_radio_btn)
 
-        output_text = radiobutton_pg.get_output_text()
-        print(output_text)
-
-        assert title_of_random_radio_btn == output_text
+        if title_of_random_radio_btn == "No":
+            print("There was an attempt to click on the disabled radio button 'No")
+        else:
+            output_text = radiobutton_pg.get_output_text()
+            print(output_text)
+            assert title_of_random_radio_btn == output_text
         # self.close_site()
+
 

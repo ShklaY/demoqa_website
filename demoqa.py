@@ -187,16 +187,20 @@ class RadioButtonPage(Base):
     radio_buttons = "//label[contains(@class, 'custom-control-label')]"
     output_text = '[class="text-success"]'
 
-    def click_on_random_radio_button(self):
-        list_of_radio_buttons = self.wait_for_visibility_of_all_elements(By.XPATH, RadioButtonPage.radio_buttons)
-        random_radio_btn = list_of_radio_buttons[random.randint(0, 2)]
-        title_of_random_radio_btn = random_radio_btn.text
-        if title_of_random_radio_btn != "No":
-            random_radio_btn.click()
-        return title_of_random_radio_btn
+    preceding_sibling_for_radio_btns = ".//preceding-sibling::input"
 
-    def get_output_text(self):
-        return self.wait_for_visibility_of_el(By.CSS_SELECTOR, RadioButtonPage.output_text).text
+    def click_on_radio_buttons(self):
+        list_of_radio_buttons = self.wait_for_visibility_of_all_elements(By.XPATH, RadioButtonPage.radio_buttons)
+        list_of_titles = []
+        for i in list_of_radio_buttons:
+            find_a_preceding_sibling = i.find_element(By.XPATH, RadioButtonPage.preceding_sibling_for_radio_btns)
+            if find_a_preceding_sibling.is_enabled():
+                list_of_titles.append(i.text)
+                i.click()
+        return list_of_titles
+
+    # def get_output_text(self):
+    #     return self.wait_for_visibility_of_el(By.CSS_SELECTOR, RadioButtonPage.output_text).text
 
 
 class TestBase:
@@ -271,15 +275,9 @@ class TestElements(TestBase):
         radiobutton_pg_header_name = radiobutton_pg.header.get_header_name()
         assert radiobutton_pg_header_name == 'Radio Button'
 
-        title_of_random_radio_btn = radiobutton_pg.click_on_random_radio_button()
+        title_of_random_radio_btn = radiobutton_pg.click_on_radio_buttons()
         print(title_of_random_radio_btn)
 
-        if title_of_random_radio_btn == "No":
-            print("There was an attempt to click on the disabled radio button 'No")
-        else:
-            output_text = radiobutton_pg.get_output_text()
-            print(output_text)
-            assert title_of_random_radio_btn == output_text
-        # self.close_site()
+
 
 

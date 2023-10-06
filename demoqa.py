@@ -183,24 +183,25 @@ class CheckBoxPage(Base):
 
 
 class RadioButtonPage(Base):
+    """сторінка Radio Button: містить локатори веб елементів та методи для взаємодії з ними"""
     header = HeaderSection()
     radio_buttons = "//label[contains(@class, 'custom-control-label')]"
     output_text = '[class="text-success"]'
 
     preceding_sibling_for_radio_btns = ".//preceding-sibling::input"
 
-    def click_on_radio_buttons(self):
+    def click_on_radio_buttons_and_get_output_text(self):
         list_of_radio_buttons = self.wait_for_visibility_of_all_elements(By.XPATH, RadioButtonPage.radio_buttons)
-        list_of_titles = []
+        list_of_input_titles = []
+        list_of_output_titles = []
         for i in list_of_radio_buttons:
             find_a_preceding_sibling = i.find_element(By.XPATH, RadioButtonPage.preceding_sibling_for_radio_btns)
             if find_a_preceding_sibling.is_enabled():
-                list_of_titles.append(i.text)
+                list_of_input_titles.append(i.text)
                 i.click()
-        return list_of_titles
-
-    # def get_output_text(self):
-    #     return self.wait_for_visibility_of_el(By.CSS_SELECTOR, RadioButtonPage.output_text).text
+                list_of_output_titles.append(
+                    self.wait_for_visibility_of_el(By.CSS_SELECTOR, RadioButtonPage.output_text).text)
+        return list_of_input_titles, list_of_output_titles
 
 
 class TestBase:
@@ -275,9 +276,9 @@ class TestElements(TestBase):
         radiobutton_pg_header_name = radiobutton_pg.header.get_header_name()
         assert radiobutton_pg_header_name == 'Radio Button'
 
-        title_of_random_radio_btn = radiobutton_pg.click_on_radio_buttons()
-        print(title_of_random_radio_btn)
-
+        list_of_input_titles, list_of_output_titles = radiobutton_pg.click_on_radio_buttons_and_get_output_text()
+        print(list_of_input_titles, list_of_output_titles)
+        assert list_of_input_titles == list_of_output_titles
 
 
 

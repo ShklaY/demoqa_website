@@ -2,6 +2,7 @@ import random
 import time
 from faker import Faker
 from selenium import webdriver
+from selenium.common import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
@@ -68,6 +69,9 @@ class MenuBar(Base):
 
     def click_on_btn_check_box(self):
         self.wait_for_visibility_of_el(By.XPATH, MenuBar.menu_btn_check_box).click()
+
+    def click_on_btn_radio_button(self):
+        self.wait_for_visibility_of_el(By.XPATH, MenuBar.menu_btn_radio_button).click()
 
 
 class ElementsPage(Base):
@@ -178,6 +182,30 @@ class CheckBoxPage(Base):
         return list_of_selected_checkboxes
 
 
+class RadioButtonPage(Base):
+    """сторінка Radio Button: містить локатори веб елементів та методи для взаємодії з ними"""
+    header = HeaderSection()
+    radio_buttons = "//label[contains(@class, 'custom-control-label')]"
+    output_text = '[class="text-success"]'
+
+    preceding_sibling_for_radio_btns = ".//preceding-sibling::input"
+
+    def click_on_radio_buttons_and_get_output_text(self):
+        """цей метод повертає списки: 1й містить усі назви клікнутих радіобатонів,
+        2й список - назви радіобатонів, що відображались на сторінці після тексту 'You have selected' """
+        list_of_radio_buttons = self.wait_for_visibility_of_all_elements(By.XPATH, RadioButtonPage.radio_buttons)
+        list_of_input_titles = []
+        list_of_output_titles = []
+        for i in list_of_radio_buttons:
+            find_a_preceding_sibling = i.find_element(By.XPATH, RadioButtonPage.preceding_sibling_for_radio_btns)
+            if find_a_preceding_sibling.is_enabled():
+                list_of_input_titles.append(i.text)
+                i.click()
+                list_of_output_titles.append(
+                    self.wait_for_visibility_of_el(By.CSS_SELECTOR, RadioButtonPage.output_text).text)
+        return list_of_input_titles, list_of_output_titles
+
+
 class TestBase:
     base = Base()
 
@@ -240,6 +268,21 @@ class TestElements(TestBase):
         output_result = checkbox_pg.get_output_result()
 
         assert titles_of_checked_checkboxes == output_result
+        # self.close_site()
+
+    def test_radio_button_page(self):
+        self.open_site()
+        InitPage().click_on_btn_elements()
+        ElementsPage().menu.click_on_btn_radio_button()
+        radiobutton_pg = RadioButtonPage()
+        radiobutton_pg_header_name = radiobutton_pg.header.get_header_name()
+        """перевірка тайтлу сторінки: """
+        assert radiobutton_pg_header_name == 'Radio Button', 'there is an error in the title on the Radio Button page'
+
+        """асьорт списків, де 1й список містить усі назви клікнутих радіобатонів , 
+        а 2й список - назви радіобатонів, що відображались на сторінці після тексту 'You have selected' """
+        list_of_input_titles, list_of_output_titles = radiobutton_pg.click_on_radio_buttons_and_get_output_text()
+        assert list_of_input_titles == list_of_output_titles
         # self.close_site()
 
 

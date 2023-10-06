@@ -191,6 +191,8 @@ class RadioButtonPage(Base):
     preceding_sibling_for_radio_btns = ".//preceding-sibling::input"
 
     def click_on_radio_buttons_and_get_output_text(self):
+        """цей метод повертає списки: 1й містить усі назви клікнутих радіобатонів,
+        2й список - назви радіобатонів, що відображались на сторінці після тексту 'You have selected' """
         list_of_radio_buttons = self.wait_for_visibility_of_all_elements(By.XPATH, RadioButtonPage.radio_buttons)
         list_of_input_titles = []
         list_of_output_titles = []
@@ -274,11 +276,13 @@ class TestElements(TestBase):
         ElementsPage().menu.click_on_btn_radio_button()
         radiobutton_pg = RadioButtonPage()
         radiobutton_pg_header_name = radiobutton_pg.header.get_header_name()
-        assert radiobutton_pg_header_name == 'Radio Button'
+        """перевірка тайтлу сторінки: """
+        assert radiobutton_pg_header_name == 'Radio Button', 'there is an error in the title on the Radio Button page'
 
+        """асьорт списків, де 1й список містить усі назви клікнутих радіобатонів , 
+        а 2й список - назви радіобатонів, що відображались на сторінці після тексту 'You have selected' """
         list_of_input_titles, list_of_output_titles = radiobutton_pg.click_on_radio_buttons_and_get_output_text()
-        print(list_of_input_titles, list_of_output_titles)
         assert list_of_input_titles == list_of_output_titles
-
+        # self.close_site()
 
 

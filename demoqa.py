@@ -73,6 +73,9 @@ class MenuBar(Base):
     def click_on_btn_radio_button(self):
         self.wait_for_visibility_of_el(By.XPATH, MenuBar.menu_btn_radio_button).click()
 
+    def click_on_btn_web_tables(self):
+        self.wait_for_visibility_of_el(By.XPATH, MenuBar.menu_btn_web_tables).click()
+
 
 class ElementsPage(Base):
     """сторінка Elements"""
@@ -206,6 +209,33 @@ class RadioButtonPage(Base):
         return list_of_input_titles, list_of_output_titles
 
 
+class WebTablesPage(Base):
+    header = HeaderSection()
+
+    btn_add = 'button[id="addNewRecordButton"]'
+    txt_first_name = 'input[id="firstName"]'
+    txt_last_name = 'input[id="lastName"]'
+    txt_user_email = 'input[id="userEmail"]'
+    txt_age = 'input[id="age"]'
+    txt_salary = 'input[id="salary"]'
+    txt_department = 'input[id="department"]'
+    btn_submit = 'button[id="submit"]'
+
+    def click_on_btn_add(self):
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.btn_add).click()
+
+    def fill_in_fields_on_the_registration_form(self):
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.txt_first_name).send_keys()
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.txt_last_name).send_keys()
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.txt_user_email).send_keys()
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.txt_age).send_keys()
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.txt_salary).send_keys()
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.txt_department).send_keys()
+
+    def click_on_btn_submit(self):
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.btn_submit).click()
+
+
 class TestBase:
     base = Base()
 
@@ -283,6 +313,16 @@ class TestElements(TestBase):
         а 2й список - назви радіобатонів, що відображались на сторінці після тексту 'You have selected' """
         list_of_input_titles, list_of_output_titles = radiobutton_pg.click_on_radio_buttons_and_get_output_text()
         assert list_of_input_titles == list_of_output_titles
+        # self.close_site()
+
+    def test_web_tables_page(self):
+        self.open_site()
+        InitPage().click_on_btn_elements()
+        ElementsPage().menu.click_on_btn_web_tables()
+        web_tables_pg = WebTablesPage()
+        web_tables_pg.click_on_btn_add()
+        time.sleep(3)
+
         # self.close_site()
 
 

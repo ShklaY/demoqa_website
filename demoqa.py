@@ -89,6 +89,12 @@ class FakeData:
     fake_email = fake.email()
     fake_current_address = fake.address()
     fake_permanent_address = fake.address()
+    fake_first_name = fake.first_name()
+    fake_last_name = fake.last_name()
+    fake_age = random.randint(18, 79)
+    fake_salary = random.randint(1000, 20000)
+    list_departments = ['Insurance', 'Compliance', 'Legal']
+    fake_department = list_departments[random.randint(0, 2)]
 
 
 class TextBoxPage(Base):
@@ -225,12 +231,12 @@ class WebTablesPage(Base):
         self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.btn_add).click()
 
     def fill_in_fields_on_the_registration_form(self):
-        self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.txt_first_name).send_keys()
-        self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.txt_last_name).send_keys()
-        self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.txt_user_email).send_keys()
-        self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.txt_age).send_keys()
-        self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.txt_salary).send_keys()
-        self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.txt_department).send_keys()
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.txt_first_name).send_keys(FakeData.fake_first_name)
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.txt_last_name).send_keys(FakeData.fake_last_name)
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.txt_user_email).send_keys(FakeData.fake_email)
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.txt_age).send_keys(FakeData.fake_age)
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.txt_salary).send_keys(FakeData.fake_salary)
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.txt_department).send_keys(FakeData.fake_department)
 
     def click_on_btn_submit(self):
         self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.btn_submit).click()
@@ -321,8 +327,9 @@ class TestElements(TestBase):
         ElementsPage().menu.click_on_btn_web_tables()
         web_tables_pg = WebTablesPage()
         web_tables_pg.click_on_btn_add()
+        web_tables_pg.fill_in_fields_on_the_registration_form()
         time.sleep(3)
-
+        web_tables_pg.click_on_btn_submit()
         # self.close_site()
 
 

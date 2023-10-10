@@ -2,7 +2,6 @@ import random
 import time
 from faker import Faker
 from selenium import webdriver
-from selenium.common import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
@@ -217,6 +216,7 @@ class RadioButtonPage(Base):
 
 class WebTablesPage(Base):
     header = HeaderSection()
+    fake = FakeData()
 
     btn_add = 'button[id="addNewRecordButton"]'
     txt_first_name = 'input[id="firstName"]'
@@ -226,6 +226,7 @@ class WebTablesPage(Base):
     txt_salary = 'input[id="salary"]'
     txt_department = 'input[id="department"]'
     btn_submit = 'button[id="submit"]'
+    rows = 'div[class="rt-tr-group"]'
 
     def click_on_btn_add(self):
         self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.btn_add).click()
@@ -237,9 +238,17 @@ class WebTablesPage(Base):
         self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.txt_age).send_keys(FakeData.fake_age)
         self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.txt_salary).send_keys(FakeData.fake_salary)
         self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.txt_department).send_keys(FakeData.fake_department)
+        return f'{FakeData.fake_first_name} {FakeData.fake_last_name} {FakeData.fake_age} {FakeData.fake_email} {FakeData.fake_salary} {FakeData.fake_department}'
 
     def click_on_btn_submit(self):
         self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.btn_submit).click()
+
+    def get_text_from_rows(self):
+        list_rows = self.wait_for_visibility_of_all_elements(By.CSS_SELECTOR, WebTablesPage.rows)
+        txt_from_rows = []
+        for i in list_rows:
+            txt_from_rows.append(i.text.replace('\n', ' '))
+        return txt_from_rows
 
 
 class TestBase:
@@ -327,9 +336,13 @@ class TestElements(TestBase):
         ElementsPage().menu.click_on_btn_web_tables()
         web_tables_pg = WebTablesPage()
         web_tables_pg.click_on_btn_add()
-        web_tables_pg.fill_in_fields_on_the_registration_form()
-        time.sleep(3)
+        input_data = web_tables_pg.fill_in_fields_on_the_registration_form()
+        print(input_data)
         web_tables_pg.click_on_btn_submit()
+        output_data = web_tables_pg.get_text_from_rows()
+        print(output_data)
+
+        assert input_data in output_data
         # self.close_site()
 
 

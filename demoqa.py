@@ -231,9 +231,11 @@ class WebTablesPage(Base):
     txt_search = 'input[id="searchBox"]'
 
     def click_on_btn_add(self):
+        """цей метод відкриває Registration form"""
         self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.btn_add).click()
 
     def fill_in_fields_on_the_registration_form(self):
+        """цей метод дозволяє заповнити поля в Registration form"""
         self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.txt_first_name).send_keys(FakeData.fake_first_name)
         self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.txt_last_name).send_keys(FakeData.fake_last_name)
         self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.txt_user_email).send_keys(FakeData.fake_email)
@@ -246,6 +248,7 @@ class WebTablesPage(Base):
         self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.btn_submit).click()
 
     def get_text_from_rows(self):
+        """цей метод повертає список значень всіх рядків таблиці"""
         list_rows = self.wait_for_visibility_of_all_elements(By.CSS_SELECTOR, WebTablesPage.rows)
         txt_from_rows = []
         for i in list_rows:
@@ -253,6 +256,7 @@ class WebTablesPage(Base):
         return txt_from_rows
 
     def perform_search_by_email(self):
+        """цей метод виконує пошук за ел адресою"""
         self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.txt_search).send_keys(FakeData.fake_email)
         return FakeData.fake_email
 
@@ -341,17 +345,25 @@ class TestElements(TestBase):
         InitPage().click_on_btn_elements()
         ElementsPage().menu.click_on_btn_web_tables()
         web_tables_pg = WebTablesPage()
+        web_tables_pg_header_name = web_tables_pg.header.get_header_name()
+        """перевірка тайтлу сторінки: """
+        assert web_tables_pg_header_name == "Web Tables", 'there is an error in the title on the Web Tables page'
+
+        """додавання нового запису в таблицю"""
         web_tables_pg.click_on_btn_add()
         input_data = web_tables_pg.fill_in_fields_on_the_registration_form()
         web_tables_pg.click_on_btn_submit()
         output_data = web_tables_pg.get_text_from_rows()
+        """перевірка чи новий запис додано в таблицю"""
         assert input_data in output_data
 
+        """виконання пошуку по емейлу"""
         the_search_email = web_tables_pg.perform_search_by_email()
         print(the_search_email)
         output_data_after_performing_the_search = web_tables_pg.get_text_from_rows()
         first_result_field = output_data_after_performing_the_search[0]
         print(first_result_field)
+        """перевірка чи є емейл в результаті пошуку"""
         assert the_search_email in first_result_field
 
         # self.close_site()

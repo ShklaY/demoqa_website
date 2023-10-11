@@ -228,6 +228,8 @@ class WebTablesPage(Base):
     btn_submit = 'button[id="submit"]'
     rows = 'div[class="rt-tr-group"]'
 
+    txt_search = 'input[id="searchBox"]'
+
     def click_on_btn_add(self):
         self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.btn_add).click()
 
@@ -249,6 +251,10 @@ class WebTablesPage(Base):
         for i in list_rows:
             txt_from_rows.append(i.text.replace('\n', ' '))
         return txt_from_rows
+
+    def perform_search_by_email(self):
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.txt_search).send_keys(FakeData.fake_email)
+        return FakeData.fake_email
 
 
 class TestBase:
@@ -337,12 +343,17 @@ class TestElements(TestBase):
         web_tables_pg = WebTablesPage()
         web_tables_pg.click_on_btn_add()
         input_data = web_tables_pg.fill_in_fields_on_the_registration_form()
-        print(input_data)
         web_tables_pg.click_on_btn_submit()
         output_data = web_tables_pg.get_text_from_rows()
-        print(output_data)
-
         assert input_data in output_data
+
+        the_search_email = web_tables_pg.perform_search_by_email()
+        print(the_search_email)
+        output_data_after_performing_the_search = web_tables_pg.get_text_from_rows()
+        first_result_field = output_data_after_performing_the_search[0]
+        print(first_result_field)
+        assert the_search_email in first_result_field
+
         # self.close_site()
 
 

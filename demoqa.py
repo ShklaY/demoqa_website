@@ -265,6 +265,7 @@ class WebTablesPage(Base):
         return email
 
     def set_new_email(self):
+        """апдейт емейлу"""
         self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.btn_edit).click()
         user_email = self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.txt_user_email)
         user_email.clear()
@@ -374,15 +375,18 @@ class TestElements(TestBase):
         the_search_email = web_tables_pg.perform_search_by_email()
         output_data_after_performing_the_search = web_tables_pg.get_text_from_rows()
         first_result_field = output_data_after_performing_the_search[0]
-        """перевірка чи є емейл в результаті пошуку"""
+        """перевірка чи є емейл в першому рядку результату пошуку"""
         assert the_search_email in first_result_field
 
+        """апдейт емейлу"""
         new_email = web_tables_pg.set_new_email()
+        """пошук по новому емейлу, перевірка чи є він в першому рядку результату пошуку"""
         web_tables_pg.perform_search_by_email(new_email)
         output_data_after_performing_the_search_with_a_new_email = web_tables_pg.get_text_from_rows()
         first_result_field_with_a_new_email = output_data_after_performing_the_search_with_a_new_email[0]
         assert new_email in first_result_field_with_a_new_email
-
+        print(new_email)
+        print(first_result_field_with_a_new_email)
         # self.close_site()
 
 

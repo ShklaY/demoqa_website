@@ -83,17 +83,18 @@ class ElementsPage(Base):
 
 
 class FakeData:
-    fake = Faker(locale='uk_UA')
-    fake_full_name = fake.name()
-    fake_email = fake.email()
-    fake_current_address = fake.address()
-    fake_permanent_address = fake.address()
-    fake_first_name = fake.first_name()
-    fake_last_name = fake.last_name()
-    fake_age = random.randint(18, 79)
-    fake_salary = random.randint(1000, 20000)
-    list_departments = ['Insurance', 'Compliance', 'Legal']
-    fake_department = list_departments[random.randint(0, 2)]
+    def __init__(self):
+        self.fake = Faker(locale='uk_UA')
+        self.fake_full_name = self.fake.name()
+        self.fake_email = self.fake.email()
+        self.fake_current_address = self.fake.address()
+        self.fake_permanent_address = self.fake.address()
+        self.fake_first_name = self.fake.first_name()
+        self.fake_last_name = self.fake.last_name()
+        self.fake_age = random.randint(18, 79)
+        self.fake_salary = random.randint(1000, 20000)
+        self.list_departments = ['Insurance', 'Compliance', 'Legal']
+        self.fake_department = self.list_departments[random.randint(0, 2)]
 
 
 class TextBoxPage(Base):
@@ -217,6 +218,7 @@ class RadioButtonPage(Base):
 class WebTablesPage(Base):
     header = HeaderSection()
     fake = FakeData()
+    email_fake = fake.fake_email
 
     btn_add = 'button[id="addNewRecordButton"]'
     txt_first_name = 'input[id="firstName"]'
@@ -229,6 +231,7 @@ class WebTablesPage(Base):
     rows = 'div[class="rt-tr-group"]'
 
     txt_search = 'input[id="searchBox"]'
+    btn_edit = '[title="Edit"]'
 
     def click_on_btn_add(self):
         """цей метод відкриває Registration form"""
@@ -236,13 +239,13 @@ class WebTablesPage(Base):
 
     def fill_in_fields_on_the_registration_form(self):
         """цей метод дозволяє заповнити поля в Registration form"""
-        self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.txt_first_name).send_keys(FakeData.fake_first_name)
-        self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.txt_last_name).send_keys(FakeData.fake_last_name)
-        self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.txt_user_email).send_keys(FakeData.fake_email)
-        self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.txt_age).send_keys(FakeData.fake_age)
-        self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.txt_salary).send_keys(FakeData.fake_salary)
-        self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.txt_department).send_keys(FakeData.fake_department)
-        return f'{FakeData.fake_first_name} {FakeData.fake_last_name} {FakeData.fake_age} {FakeData.fake_email} {FakeData.fake_salary} {FakeData.fake_department}'
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.txt_first_name).send_keys(WebTablesPage.fake.fake_first_name)
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.txt_last_name).send_keys(WebTablesPage.fake.fake_last_name)
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.txt_user_email).send_keys(WebTablesPage.email_fake)
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.txt_age).send_keys(WebTablesPage.fake.fake_age)
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.txt_salary).send_keys(WebTablesPage.fake.fake_salary)
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.txt_department).send_keys(WebTablesPage.fake.fake_department)
+        return f'{WebTablesPage.fake.fake_first_name} {WebTablesPage.fake.fake_last_name} {WebTablesPage.fake.fake_age} {WebTablesPage.email_fake} {WebTablesPage.fake.fake_salary} {WebTablesPage.fake.fake_department}'
 
     def click_on_btn_submit(self):
         self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.btn_submit).click()
@@ -255,10 +258,20 @@ class WebTablesPage(Base):
             txt_from_rows.append(i.text.replace('\n', ' '))
         return txt_from_rows
 
-    def perform_search_by_email(self):
+    def perform_search_by_email(self, email=email_fake):
         """цей метод виконує пошук за ел адресою"""
-        self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.txt_search).send_keys(FakeData.fake_email)
-        return FakeData.fake_email
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.txt_search).clear()
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.txt_search).send_keys(email)
+        return email
+
+    def set_new_email(self):
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.btn_edit).click()
+        user_email = self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.txt_user_email)
+        user_email.clear()
+        fake_data = FakeData()
+        user_email.send_keys(fake_data.fake_email)
+        self.click_on_btn_submit()
+        return fake_data.fake_email
 
 
 class TestBase:
@@ -359,12 +372,16 @@ class TestElements(TestBase):
 
         """виконання пошуку по емейлу"""
         the_search_email = web_tables_pg.perform_search_by_email()
-        print(the_search_email)
         output_data_after_performing_the_search = web_tables_pg.get_text_from_rows()
         first_result_field = output_data_after_performing_the_search[0]
-        print(first_result_field)
         """перевірка чи є емейл в результаті пошуку"""
         assert the_search_email in first_result_field
+
+        new_email = web_tables_pg.set_new_email()
+        web_tables_pg.perform_search_by_email(new_email)
+        output_data_after_performing_the_search_with_a_new_email = web_tables_pg.get_text_from_rows()
+        first_result_field_with_a_new_email = output_data_after_performing_the_search_with_a_new_email[0]
+        assert new_email in first_result_field_with_a_new_email
 
         # self.close_site()
 

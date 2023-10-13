@@ -282,9 +282,11 @@ class WebTablesPage(Base):
         return fake_data.fake_email
 
     def remove_record(self):
+        """цей метод видаляє новий запис з таблиці"""
         self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.btn_delete).click()
 
     def get_the_checking_text(self):
+        """цей метод повертає текст, який підтверджує, що рядок з заданим емейлом не знайдено """
         return self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.the_checking_text).text
 
 
@@ -399,10 +401,12 @@ class TestElements(TestBase):
         first_result_field_with_a_new_email = output_data_after_performing_the_search_with_a_new_email[0]
         assert new_email in first_result_field_with_a_new_email
 
+        """видалення реклами в футері"""
         web_tables_pg.remove_advertising_in_footer()
+        """видалення нового запису з таблиці"""
         web_tables_pg.remove_record()
         the_checking_text = web_tables_pg.get_the_checking_text()
-        assert the_checking_text == 'No rows found'
+        assert the_checking_text == 'No rows found', 'after removing a new record, the message "No rows found" does not appear'
         # self.close_site()
 
 

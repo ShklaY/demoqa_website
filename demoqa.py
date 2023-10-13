@@ -101,6 +101,7 @@ class TextBoxPage(Base):
     """сторінка Text Box: містить локатори веб елементів та методи для взаємодії з ними"""
     header = HeaderSection()
     menu = MenuBar()
+    fake = FakeData()
 
     txt_full_name = 'input[id="userName"]'
     txt_email = 'input[id="userEmail"]'
@@ -114,16 +115,20 @@ class TextBoxPage(Base):
     output_permanent_address = 'p[id="permanentAddress"]'
 
     def set_full_name(self):
-        self.wait_for_visibility_of_el(By.CSS_SELECTOR, TextBoxPage.txt_full_name).send_keys(FakeData.fake_full_name)
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, TextBoxPage.txt_full_name).send_keys(TextBoxPage.fake.fake_full_name)
+        return TextBoxPage.fake.fake_full_name
 
     def set_email(self):
-        self.wait_for_visibility_of_el(By.CSS_SELECTOR, TextBoxPage.txt_email).send_keys(FakeData.fake_email)
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, TextBoxPage.txt_email).send_keys(TextBoxPage.fake.fake_email)
+        return TextBoxPage.fake.fake_email
 
     def set_current_address(self):
-        self.wait_for_visibility_of_el(By.CSS_SELECTOR, TextBoxPage.txt_current_address).send_keys(FakeData.fake_current_address)
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, TextBoxPage.txt_current_address).send_keys(TextBoxPage.fake.fake_current_address)
+        return TextBoxPage.fake.fake_current_address
 
     def set_permanent_address(self):
-        self.wait_for_visibility_of_el(By.CSS_SELECTOR, TextBoxPage.txt_permanent_address).send_keys(FakeData.fake_permanent_address)
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, TextBoxPage.txt_permanent_address).send_keys(TextBoxPage.fake.fake_permanent_address)
+        return TextBoxPage.fake.fake_permanent_address
 
     def scroll_and_click_on_btn_submit(self):
         button_submit = self.wait_for_visibility_of_el(By.CSS_SELECTOR, TextBoxPage.btn_submit)
@@ -300,10 +305,10 @@ class TestElements(TestBase):
         """перевірка тайтлу сторінки: """
         assert textbox_pg_header_name == 'Text Box'
         """заповнення полей: ім'я, емейл, адреса та клік submit"""
-        textbox_pg.set_full_name()
-        textbox_pg.set_email()
-        textbox_pg.set_current_address()
-        textbox_pg.set_permanent_address()
+        input_full_name = textbox_pg.set_full_name()
+        input_email = textbox_pg.set_email()
+        input_current_address = textbox_pg.set_current_address()
+        input_permanent_address = textbox_pg.set_permanent_address()
         textbox_pg.remove_advertising_in_footer()
         textbox_pg.scroll_and_click_on_btn_submit()
         """поміщаю в змінні вихідні дані: ім'я, емейл, адреси"""
@@ -312,10 +317,10 @@ class TestElements(TestBase):
         output_current_address = textbox_pg.get_output_current_address()
         output_permanent_address = textbox_pg.get_output_permanent_address()
 
-        assert output_full_name == FakeData.fake_full_name
-        assert output_email == FakeData.fake_email
-        assert output_current_address == FakeData.fake_current_address
-        assert output_permanent_address == FakeData.fake_permanent_address
+        assert output_full_name == input_full_name
+        assert output_email == input_email
+        assert output_current_address == input_current_address
+        assert output_permanent_address == input_permanent_address
         # self.close_site()
 
     def test_check_box_page(self):

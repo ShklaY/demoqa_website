@@ -237,6 +237,8 @@ class WebTablesPage(Base):
 
     txt_search = 'input[id="searchBox"]'
     btn_edit = '[title="Edit"]'
+    btn_delete = '[title="Delete"]'
+    the_checking_text = '[class="rt-noData"]'
 
     def click_on_btn_add(self):
         """цей метод відкриває Registration form"""
@@ -278,6 +280,12 @@ class WebTablesPage(Base):
         user_email.send_keys(fake_data.fake_email)
         self.click_on_btn_submit()
         return fake_data.fake_email
+
+    def remove_record(self):
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.btn_delete).click()
+
+    def get_the_checking_text(self):
+        return self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.the_checking_text).text
 
 
 class TestBase:
@@ -390,8 +398,11 @@ class TestElements(TestBase):
         output_data_after_performing_the_search_with_a_new_email = web_tables_pg.get_text_from_rows()
         first_result_field_with_a_new_email = output_data_after_performing_the_search_with_a_new_email[0]
         assert new_email in first_result_field_with_a_new_email
-        print(new_email)
-        print(first_result_field_with_a_new_email)
+
+        web_tables_pg.remove_advertising_in_footer()
+        web_tables_pg.remove_record()
+        the_checking_text = web_tables_pg.get_the_checking_text()
+        assert the_checking_text == 'No rows found'
         # self.close_site()
 
 

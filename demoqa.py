@@ -289,6 +289,32 @@ class WebTablesPage(Base):
         """цей метод повертає текст, який підтверджує, що рядок з заданим емейлом не знайдено """
         return self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.the_checking_text).text
 
+    def click_on_the_quantity_of_rows(self):
+        btn_the_quantity_of_rows = 'select[aria-label="rows per page"]'
+        options = 'select[aria-label="rows per page"] option'
+        wait_for_btn_the_quantity_of_rows = self.wait_for_visibility_of_el(By.CSS_SELECTOR, btn_the_quantity_of_rows)
+        self.scroll_js(self.wait_for_visibility_of_el(By.CSS_SELECTOR, btn_the_quantity_of_rows))
+        wait_for_btn_the_quantity_of_rows.click()
+        list_of_the_options = self.wait_for_visibility_of_all_elements(By.CSS_SELECTOR, options)
+        li = []
+        li_for_rows = []
+
+        rows = 'div[class="rt-tr-group"]'
+
+        for i in list_of_the_options:
+            i.click()
+            print(i.text)
+            li.append(i.text.replace(' rows', ''))
+            time.sleep(2)
+
+            self.scroll_js(self.wait_for_visibility_of_el(By.CSS_SELECTOR, btn_the_quantity_of_rows))
+            all_rows = self.wait_for_visibility_of_all_elements(By.CSS_SELECTOR, rows)
+            li_for_rows.append(str(len(all_rows)))
+            wait_for_btn_the_quantity_of_rows.click()
+            time.sleep(4)
+
+        return li, li_for_rows
+
 
 class TestBase:
     base = Base()
@@ -409,4 +435,8 @@ class TestElements(TestBase):
         assert the_checking_text == 'No rows found', 'after removing a new record, the message "No rows found" does not appear'
         # self.close_site()
 
+        time.sleep(4)
+        li, li_for_rows = web_tables_pg.click_on_the_quantity_of_rows()
+        print(li, end="\n ------------------ \n")
+        print(li_for_rows)
 

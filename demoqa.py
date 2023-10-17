@@ -4,6 +4,7 @@ from faker import Faker
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.wait import WebDriverWait
 
 driver = webdriver.Chrome()
@@ -289,31 +290,25 @@ class WebTablesPage(Base):
         """цей метод повертає текст, який підтверджує, що рядок з заданим емейлом не знайдено """
         return self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.the_checking_text).text
 
-    def click_on_the_quantity_of_rows(self):
+    def quantity_of_rows(self):
         btn_the_quantity_of_rows = 'select[aria-label="rows per page"]'
-        options = 'select[aria-label="rows per page"] option'
         wait_for_btn_the_quantity_of_rows = self.wait_for_visibility_of_el(By.CSS_SELECTOR, btn_the_quantity_of_rows)
-        self.scroll_js(self.wait_for_visibility_of_el(By.CSS_SELECTOR, btn_the_quantity_of_rows))
-        wait_for_btn_the_quantity_of_rows.click()
-        list_of_the_options = self.wait_for_visibility_of_all_elements(By.CSS_SELECTOR, options)
-        li = []
-        li_for_rows = []
-
+        select = Select(wait_for_btn_the_quantity_of_rows)
+        list_of_options = select.options
+        list_of_clicked_options = []
         rows = 'div[class="rt-tr-group"]'
+        list_of_counted_rows = []
 
-        for i in list_of_the_options:
+        for i in list_of_options:
+            self.scroll_js(wait_for_btn_the_quantity_of_rows)
+            # wait_for_btn_the_quantity_of_rows.click()
             i.click()
-            print(i.text)
-            li.append(i.text.replace(' rows', ''))
-            time.sleep(2)
+            list_of_clicked_options.append(i.text.replace(' rows', ''))
+            actual_quantity_rows = self.wait_for_visibility_of_all_elements(By.CSS_SELECTOR, rows)
+            list_of_counted_rows.append(len(actual_quantity_rows))
+            time.sleep(3)
 
-            self.scroll_js(self.wait_for_visibility_of_el(By.CSS_SELECTOR, btn_the_quantity_of_rows))
-            all_rows = self.wait_for_visibility_of_all_elements(By.CSS_SELECTOR, rows)
-            li_for_rows.append(str(len(all_rows)))
-            wait_for_btn_the_quantity_of_rows.click()
-            time.sleep(4)
-
-        return li, li_for_rows
+        return list_of_clicked_options, list_of_counted_rows
 
 
 class TestBase:
@@ -433,10 +428,11 @@ class TestElements(TestBase):
         web_tables_pg.remove_record()
         the_checking_text = web_tables_pg.get_the_checking_text()
         assert the_checking_text == 'No rows found', 'after removing a new record, the message "No rows found" does not appear'
-        # self.close_site()
 
         time.sleep(4)
-        li, li_for_rows = web_tables_pg.click_on_the_quantity_of_rows()
-        print(li, end="\n ------------------ \n")
-        print(li_for_rows)
+        list_of_clicked_options, list_of_counted_rows = web_tables_pg.quantity_of_rows()
+        print(list_of_clicked_options, end="\n ------------------ \n")
+        print(list_of_counted_rows)
+
+        # self.close_site()
 

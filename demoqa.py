@@ -241,6 +241,8 @@ class WebTablesPage(Base):
     btn_delete = '[title="Delete"]'
     the_checking_text = '[class="rt-noData"]'
 
+    btn_the_quantity_of_rows = 'select[aria-label="rows per page"]'
+
     def click_on_btn_add(self):
         """цей метод відкриває Registration form"""
         self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.btn_add).click()
@@ -291,23 +293,20 @@ class WebTablesPage(Base):
         return self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.the_checking_text).text
 
     def quantity_of_rows(self):
-        btn_the_quantity_of_rows = 'select[aria-label="rows per page"]'
-        wait_for_btn_the_quantity_of_rows = self.wait_for_visibility_of_el(By.CSS_SELECTOR, btn_the_quantity_of_rows)
+        """цей метод: 1)змінює к-сть рядків таблиці що відображаються на сторінці;
+        2) підраховує к-сть рядків, що фактично відображено в таблиці"""
+        wait_for_btn_the_quantity_of_rows = self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.btn_the_quantity_of_rows)
         select = Select(wait_for_btn_the_quantity_of_rows)
         list_of_options = select.options
         list_of_clicked_options = []
-        rows = 'div[class="rt-tr-group"]'
         list_of_counted_rows = []
 
         for i in list_of_options:
             self.scroll_js(wait_for_btn_the_quantity_of_rows)
-            # wait_for_btn_the_quantity_of_rows.click()
             i.click()
             list_of_clicked_options.append(i.text.replace(' rows', ''))
-            actual_quantity_rows = self.wait_for_visibility_of_all_elements(By.CSS_SELECTOR, rows)
-            list_of_counted_rows.append(len(actual_quantity_rows))
-            time.sleep(3)
-
+            actual_quantity_rows = self.wait_for_visibility_of_all_elements(By.CSS_SELECTOR, WebTablesPage.rows)
+            list_of_counted_rows.append(str(len(actual_quantity_rows)))
         return list_of_clicked_options, list_of_counted_rows
 
 
@@ -429,10 +428,8 @@ class TestElements(TestBase):
         the_checking_text = web_tables_pg.get_the_checking_text()
         assert the_checking_text == 'No rows found', 'after removing a new record, the message "No rows found" does not appear'
 
-        time.sleep(4)
+        """перевірка чи обрані опції к-сті рядків відповідають фактичній к-сті рядків відображених на сторінці"""
         list_of_clicked_options, list_of_counted_rows = web_tables_pg.quantity_of_rows()
-        print(list_of_clicked_options, end="\n ------------------ \n")
-        print(list_of_counted_rows)
-
+        assert list_of_clicked_options == list_of_counted_rows
         # self.close_site()
 

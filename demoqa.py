@@ -230,6 +230,7 @@ class RadioButtonPage(Base):
 
 
 class WebTablesPage(Base):
+    """сторінка Web Tables: містить локатори веб елементів та методи для взаємодії з ними"""
     header = HeaderSection()
     fake = FakeData()
     email_fake = fake.fake_email
@@ -325,6 +326,7 @@ class FormsPage(Base):
 
 
 class PracticeFormPage(Base):
+    """сторінка Practice Form: містить локатори веб елементів та методи для взаємодії з ними"""
     header = HeaderSection()
 
 
@@ -461,6 +463,7 @@ class TestForms(TestBase):
         forms_pg_header_name = forms_pg.header.get_header_name()
         assert forms_pg_header_name == "Forms"
         forms_pg.menu.click_on_btn_practice_form()
+        """відклилась стрінка Practice Form"""
         practice_form_pg = PracticeFormPage()
         practice_form_pg_header_name = practice_form_pg.header.get_header_name()
         assert practice_form_pg_header_name == 'Practice Form'

@@ -44,9 +44,13 @@ class Base:
 class InitPage(Base):
     """початкова сторінка: містить локатори веб елементів та методи для взаємодії з ними"""
     btn_elements = '//*[@id="app"]/div/div/div[2]/div/div[1]'
+    btn_forms = '//*[@id="app"]/div/div/div[2]/div/div[2]'
 
     def click_on_btn_elements(self):
         self.wait_for_visibility_of_el(By.XPATH, InitPage.btn_elements).click()
+
+    def click_on_btn_forms(self):
+        self.wait_for_visibility_of_el(By.XPATH, InitPage.btn_forms).click()
 
 
 class HeaderSection(Base):
@@ -63,6 +67,7 @@ class MenuBar(Base):
     menu_btn_check_box = '//span[text()="Check Box"]'
     menu_btn_radio_button = '//span[text()="Radio Button"]'
     menu_btn_web_tables = '//span[text()="Web Tables"]'
+    menu_btn_practice_form = '//span[text()="Practice Form"]'
 
     def click_on_btn_text_box(self):
         self.wait_for_visibility_of_el(By.XPATH, MenuBar.menu_btn_text_box).click()
@@ -75,6 +80,9 @@ class MenuBar(Base):
 
     def click_on_btn_web_tables(self):
         self.wait_for_visibility_of_el(By.XPATH, MenuBar.menu_btn_web_tables).click()
+
+    def click_on_btn_practice_form(self):
+        self.wait_for_visibility_of_el(By.XPATH, MenuBar.menu_btn_practice_form).click()
 
 
 class ElementsPage(Base):
@@ -310,6 +318,16 @@ class WebTablesPage(Base):
         return list_of_clicked_options, list_of_counted_rows
 
 
+class FormsPage(Base):
+    """сторінка Forms"""
+    header = HeaderSection()
+    menu = MenuBar()
+
+
+class PracticeFormPage(Base):
+    header = HeaderSection()
+
+
 class TestBase:
     base = Base()
 
@@ -432,4 +450,21 @@ class TestElements(TestBase):
         list_of_clicked_options, list_of_counted_rows = web_tables_pg.quantity_of_rows()
         assert list_of_clicked_options == list_of_counted_rows
         # self.close_site()
+
+
+class TestForms(TestBase):
+    def test_practice_form(self):
+        self.open_site()
+        InitPage().click_on_btn_forms()
+        """відклилась стрінка Forms"""
+        forms_pg = FormsPage()
+        forms_pg_header_name = forms_pg.header.get_header_name()
+        assert forms_pg_header_name == "Forms"
+        forms_pg.menu.click_on_btn_practice_form()
+        practice_form_pg = PracticeFormPage()
+        practice_form_pg_header_name = practice_form_pg.header.get_header_name()
+        assert practice_form_pg_header_name == 'Practice Form'
+
+        # self.close_site()
+
 

@@ -329,6 +329,25 @@ class PracticeFormPage(Base):
     """сторінка Practice Form: містить локатори веб елементів та методи для взаємодії з ними"""
     header = HeaderSection()
 
+    txt_first_name = '[id="firstName"]'
+    txt_last_name = '[id="lastName"]'
+    txt_email = '[id="userEmail"]'
+    radio_btn_gender = f'[id="gender-radio-{random.randint(1,3)}"]'
+    txt_mobile_number = '[id="userNumber"]'
+    date_of_birth = '[id="dateOfBirthInput"]'
+    txt_subjects = '[id="subjectsInput"]'
+    hobbies = f'[id="hobbies-checkbox-{random.randint(1,3)}"]'
+    picture = ''
+    txt_current_address = '[id="currentAddress"]'
+    select_state = '[id="state"]'
+    select_city = '[id="city"]'
+    btn_submit = '[id="submit"]'
+
+    def set_student_registration_form(self):
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.txt_first_name).send_keys(FakeData().fake_first_name)
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.txt_last_name).send_keys(FakeData().fake_last_name)
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.txt_email).send_keys(FakeData().fake_email)
+
 
 class TestBase:
     base = Base()
@@ -467,6 +486,9 @@ class TestForms(TestBase):
         practice_form_pg = PracticeFormPage()
         practice_form_pg_header_name = practice_form_pg.header.get_header_name()
         assert practice_form_pg_header_name == 'Practice Form'
+
+        practice_form_pg.remove_advertising_in_footer()
+        practice_form_pg.set_student_registration_form()
 
         # self.close_site()
 

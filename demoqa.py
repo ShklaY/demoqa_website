@@ -104,6 +104,7 @@ class FakeData:
         self.fake_salary = random.randint(1000, 20000)
         self.list_departments = ['Insurance', 'Compliance', 'Legal']
         self.fake_department = self.list_departments[random.randint(0, 2)]
+        self.fake_phone_number = random.randint(9347822912, 9947822913)
 
 
 class TextBoxPage(Base):
@@ -332,11 +333,11 @@ class PracticeFormPage(Base):
     txt_first_name = '[id="firstName"]'
     txt_last_name = '[id="lastName"]'
     txt_email = '[id="userEmail"]'
-    radio_btn_gender = f'[id="gender-radio-{random.randint(1,3)}"]'
+    radio_btn_gender = f'[for="gender-radio-{random.randint(1,3)}"]'
     txt_mobile_number = '[id="userNumber"]'
     date_of_birth = '[id="dateOfBirthInput"]'
     txt_subjects = '[id="subjectsInput"]'
-    hobbies = f'[id="hobbies-checkbox-{random.randint(1,3)}"]'
+    hobbies = f'[for="hobbies-checkbox-{random.randint(1,3)}"]'
     picture = ''
     txt_current_address = '[id="currentAddress"]'
     select_state = '[id="state"]'
@@ -347,6 +348,12 @@ class PracticeFormPage(Base):
         self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.txt_first_name).send_keys(FakeData().fake_first_name)
         self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.txt_last_name).send_keys(FakeData().fake_last_name)
         self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.txt_email).send_keys(FakeData().fake_email)
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.radio_btn_gender).click()
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.txt_mobile_number).send_keys(FakeData().fake_phone_number)
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.hobbies).click()
+
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.txt_current_address).send_keys(FakeData().fake_current_address)
+        self.scroll_js(self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.btn_submit))
 
 
 class TestBase:

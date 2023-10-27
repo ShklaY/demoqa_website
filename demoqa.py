@@ -2,6 +2,7 @@ import random
 import time
 from faker import Faker
 from selenium import webdriver
+from selenium.webdriver import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.select import Select
@@ -102,9 +103,12 @@ class FakeData:
         self.fake_last_name = self.fake.last_name()
         self.fake_age = random.randint(18, 79)
         self.fake_salary = random.randint(1000, 20000)
-        self.list_departments = ['Insurance', 'Compliance', 'Legal']
-        self.fake_department = self.list_departments[random.randint(0, 2)]
+        list_departments = ['Insurance', 'Compliance', 'Legal']
+        self.fake_department = list_departments[random.randint(0, 2)]
         self.fake_phone_number = random.randint(9347822912, 9947822913)
+        list_subjects = ["Hindi", "English", "Maths", "Physics", "Chemistry", "Biology", "Computer Science", "Commerce",
+                         "Accounting", "Economics", "Arts", "Social Studies", "History", "Civics"]
+        self.fake_subject = list_subjects[random.randint(0, 13)]
 
 
 class TextBoxPage(Base):
@@ -350,6 +354,8 @@ class PracticeFormPage(Base):
         self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.txt_email).send_keys(FakeData().fake_email)
         self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.radio_btn_gender).click()
         self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.txt_mobile_number).send_keys(FakeData().fake_phone_number)
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.txt_subjects).send_keys(FakeData().fake_subject)
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.txt_subjects).send_keys(Keys.ENTER)
         self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.hobbies).click()
 
         self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.txt_current_address).send_keys(FakeData().fake_current_address)

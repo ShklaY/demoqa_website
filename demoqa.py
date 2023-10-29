@@ -357,39 +357,38 @@ class PracticeFormPage(Base):
     hobbies = f'[for="hobbies-checkbox-{random.randint(1,3)}"]'
     picture = ''
     txt_current_address = '[id="currentAddress"]'
+
     select_state = 'div[id="state"]'
+    locator_input_state = 'input[id="react-select-3-input"]'
     select_city = 'div[id="city"]'
+    locator_input_city = 'input[id="react-select-4-input"]'
     btn_submit = '[id="submit"]'
 
     def set_student_registration_form(self):
+        """введення імені, прізвища, емейлу, №тел; вибір гендеру"""
         self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.txt_first_name).send_keys(Data().fake_first_name)
         self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.txt_last_name).send_keys(Data().fake_last_name)
         self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.txt_email).send_keys(Data().fake_email)
         self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.radio_btn_gender).click()
         self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.txt_mobile_number).send_keys(Data().fake_phone_number)
-
-        """вибір предмету"""
-        self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.txt_subjects).send_keys(Data().subject)
-        self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.txt_subjects).send_keys(Keys.ENTER)
-
+        """вибір предмету* """
+        self.helper(PracticeFormPage.txt_subjects, Data().subject)
+        """вибір хоббі, введення адреси"""
         self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.hobbies).click()
         self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.txt_current_address).send_keys(Data().fake_current_address)
-        # self.scroll_js(self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.btn_submit))
-
-        """вибір штату"""
+        """вибір штату* """
         self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.select_state).click()
-        locator_input_state = 'input[id="react-select-3-input"]'
-        self.wait_for_visibility_of_el(By.CSS_SELECTOR, locator_input_state).send_keys(DataStateAndCity.random_state)
-        self.wait_for_visibility_of_el(By.CSS_SELECTOR, locator_input_state).send_keys(Keys.ENTER)
-
-        """вибір міста"""
+        self.helper(PracticeFormPage.locator_input_state, DataStateAndCity.random_state)
+        """вибір міста* """
         self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.select_city).click()
-        locator_input_city = 'input[id="react-select-4-input"]'
-        self.wait_for_visibility_of_el(By.CSS_SELECTOR, locator_input_city).send_keys(DataStateAndCity.random_city)
-        self.wait_for_visibility_of_el(By.CSS_SELECTOR, locator_input_city).send_keys(Keys.ENTER)
-
+        self.helper(PracticeFormPage.locator_input_city, DataStateAndCity.random_city)
         """клік на кнпку submit"""
         self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.btn_submit).click()
+
+    def helper(self, locator, data):
+        """цей допоміжний метод для взаємодії з полями Subjects, State and City"""
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, locator).send_keys(data)
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, locator).send_keys(Keys.ENTER)
 
 
 class TestBase:
@@ -530,6 +529,7 @@ class TestForms(TestBase):
         practice_form_pg_header_name = practice_form_pg.header.get_header_name()
         assert practice_form_pg_header_name == 'Practice Form'
 
+        """видалення реклами в футері, що перекриває кнопку submit; заповнення форми реєстрації студента"""
         practice_form_pg.remove_advertising_in_footer()
         practice_form_pg.set_student_registration_form()
 

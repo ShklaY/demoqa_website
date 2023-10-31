@@ -364,6 +364,8 @@ class PracticeFormPage(Base):
     locator_input_city = 'input[id="react-select-4-input"]'
     btn_submit = '[id="submit"]'
 
+    result_table = '//tr/td[2]'
+
     def set_student_registration_form(self):
         """введення імені, прізвища, емейлу, №тел; вибір гендеру"""
         self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.txt_first_name).send_keys(Data().fake_first_name)
@@ -386,9 +388,17 @@ class PracticeFormPage(Base):
         self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.btn_submit).click()
 
     def helper(self, locator, data):
-        """цей допоміжний метод для взаємодії з полями Subjects, State and City"""
+        """допоміжний метод для взаємодії з полями Subjects, State and City"""
         self.wait_for_visibility_of_el(By.CSS_SELECTOR, locator).send_keys(data)
         self.wait_for_visibility_of_el(By.CSS_SELECTOR, locator).send_keys(Keys.ENTER)
+
+    def get_data_result(self):
+        """цей метод повертає дані з підтверджувальної таблиці"""
+        table = self.wait_for_visibility_of_all_elements(By.XPATH, PracticeFormPage.result_table)
+        list_with_data_result = []
+        for i in table:
+            list_with_data_result.append(i.text)
+        return list_with_data_result
 
 
 class TestBase:
@@ -532,6 +542,10 @@ class TestForms(TestBase):
         """видалення реклами в футері, що перекриває кнопку submit; заповнення форми реєстрації студента"""
         practice_form_pg.remove_advertising_in_footer()
         practice_form_pg.set_student_registration_form()
+
+        res_name, res_email, res_gender, res_mobile, res_date, res_subjects, res_hobbies, subm_picture, res_address, \
+        res_state_and_city = practice_form_pg.get_data_result()
+        print(res_name, res_email, res_gender, res_mobile, res_subjects, res_hobbies, res_address, res_state_and_city)
 
         # self.close_site()
 

@@ -346,6 +346,7 @@ class DataStateAndCity:
 class PracticeFormPage(Base):
     """сторінка Practice Form: містить локатори веб елементів та методи для взаємодії з ними"""
     header = HeaderSection()
+    fake = Data()
 
     txt_first_name = '[id="firstName"]'
     txt_last_name = '[id="lastName"]'
@@ -368,16 +369,23 @@ class PracticeFormPage(Base):
 
     def set_student_registration_form(self):
         """введення імені, прізвища, емейлу, №тел; вибір гендеру"""
-        self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.txt_first_name).send_keys(Data().fake_first_name)
-        self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.txt_last_name).send_keys(Data().fake_last_name)
-        self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.txt_email).send_keys(Data().fake_email)
-        self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.radio_btn_gender).click()
-        self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.txt_mobile_number).send_keys(Data().fake_phone_number)
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.txt_first_name).send_keys(PracticeFormPage.fake.fake_first_name)
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.txt_last_name).send_keys(PracticeFormPage.fake.fake_last_name)
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.txt_email).send_keys(PracticeFormPage.fake.fake_email)
+
+        wait_for_radio_btn_gender = self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.radio_btn_gender)
+        wait_for_radio_btn_gender.click()
+        chosen_gender = wait_for_radio_btn_gender.text
+
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.txt_mobile_number).send_keys(PracticeFormPage.fake.fake_phone_number)
         """вибір предмету* """
-        self.helper(PracticeFormPage.txt_subjects, Data().subject)
+        self.helper(PracticeFormPage.txt_subjects, PracticeFormPage.fake.subject)
         """вибір хоббі, введення адреси"""
-        self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.hobbies).click()
-        self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.txt_current_address).send_keys(Data().fake_current_address)
+        wait_for_hobbies = self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.hobbies)
+        wait_for_hobbies.click()
+        chosen_hobby = wait_for_hobbies.text
+
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.txt_current_address).send_keys(PracticeFormPage.fake.fake_current_address)
         """вибір штату* """
         self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.select_state).click()
         self.helper(PracticeFormPage.locator_input_state, DataStateAndCity.random_state)
@@ -386,6 +394,9 @@ class PracticeFormPage(Base):
         self.helper(PracticeFormPage.locator_input_city, DataStateAndCity.random_city)
         """клік на кнпку submit"""
         self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.btn_submit).click()
+        return PracticeFormPage.fake.fake_first_name, PracticeFormPage.fake.fake_last_name, PracticeFormPage.fake.fake_email, \
+               chosen_gender, str(PracticeFormPage.fake.fake_phone_number), PracticeFormPage.fake.subject, \
+               chosen_hobby, PracticeFormPage.fake.fake_current_address, DataStateAndCity.random_state, DataStateAndCity.random_city
 
     def helper(self, locator, data):
         """допоміжний метод для взаємодії з полями Subjects, State and City"""
@@ -541,12 +552,19 @@ class TestForms(TestBase):
 
         """видалення реклами в футері, що перекриває кнопку submit; заповнення форми реєстрації студента"""
         practice_form_pg.remove_advertising_in_footer()
-        practice_form_pg.set_student_registration_form()
+        inp_first_name, inp_last_name, inp_email, inp_gender, inp_mobile, inp_subject, inp_hobby, inp_address, inp_state, inp_city = practice_form_pg.set_student_registration_form()
 
-        res_name, res_email, res_gender, res_mobile, res_date, res_subjects, res_hobbies, subm_picture, res_address, \
-        res_state_and_city = practice_form_pg.get_data_result()
-        print(res_name, res_email, res_gender, res_mobile, res_subjects, res_hobbies, res_address, res_state_and_city)
+        """дані з підтверджувальної таблиці"""
+        res_name, res_email, res_gender, res_mobile, res_date, res_subject, res_hobby, res_picture, res_address, res_state_and_city = practice_form_pg.get_data_result()
 
+        assert f'{inp_first_name} {inp_last_name}' == res_name, 'name error'
+        assert inp_email == res_email, 'email error'
+        assert inp_gender == res_gender, 'gender error'
+        assert inp_mobile == res_mobile, 'mobile error'
+        assert inp_subject == res_subject, 'subject error'
+        assert inp_hobby == res_hobby, 'hobby error'
+        assert inp_address == res_address, 'address error'
+        assert f'{inp_state} {inp_city}' == res_state_and_city, 'state/city error'
         # self.close_site()
 
 

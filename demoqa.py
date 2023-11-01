@@ -2,6 +2,7 @@ import random
 import time
 from faker import Faker
 from selenium import webdriver
+from selenium.webdriver import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.select import Select
@@ -39,14 +40,19 @@ class Base:
         """Цей метод видаляє рекламу в футері"""
         self.driver.execute_script('document.getElementById("adplus-anchor").remove();')
         self.driver.execute_script('document.getElementsByTagName("footer")[0].remove();')
+        self.driver.execute_script('document.getElementById("close-fixedban").remove();')
 
 
 class InitPage(Base):
     """початкова сторінка: містить локатори веб елементів та методи для взаємодії з ними"""
     btn_elements = '//*[@id="app"]/div/div/div[2]/div/div[1]'
+    btn_forms = '//*[@id="app"]/div/div/div[2]/div/div[2]'
 
     def click_on_btn_elements(self):
         self.wait_for_visibility_of_el(By.XPATH, InitPage.btn_elements).click()
+
+    def click_on_btn_forms(self):
+        self.wait_for_visibility_of_el(By.XPATH, InitPage.btn_forms).click()
 
 
 class HeaderSection(Base):
@@ -63,6 +69,7 @@ class MenuBar(Base):
     menu_btn_check_box = '//span[text()="Check Box"]'
     menu_btn_radio_button = '//span[text()="Radio Button"]'
     menu_btn_web_tables = '//span[text()="Web Tables"]'
+    menu_btn_practice_form = '//span[text()="Practice Form"]'
 
     def click_on_btn_text_box(self):
         self.wait_for_visibility_of_el(By.XPATH, MenuBar.menu_btn_text_box).click()
@@ -76,6 +83,9 @@ class MenuBar(Base):
     def click_on_btn_web_tables(self):
         self.wait_for_visibility_of_el(By.XPATH, MenuBar.menu_btn_web_tables).click()
 
+    def click_on_btn_practice_form(self):
+        self.wait_for_visibility_of_el(By.XPATH, MenuBar.menu_btn_practice_form).click()
+
 
 class ElementsPage(Base):
     """сторінка Elements"""
@@ -83,7 +93,7 @@ class ElementsPage(Base):
     menu = MenuBar()
 
 
-class FakeData:
+class Data:
     def __init__(self):
         self.fake = Faker(locale='uk_UA')
         self.fake_full_name = self.fake.name()
@@ -94,15 +104,19 @@ class FakeData:
         self.fake_last_name = self.fake.last_name()
         self.fake_age = random.randint(18, 79)
         self.fake_salary = random.randint(1000, 20000)
-        self.list_departments = ['Insurance', 'Compliance', 'Legal']
-        self.fake_department = self.list_departments[random.randint(0, 2)]
+        list_departments = ['Insurance', 'Compliance', 'Legal']
+        self.department = list_departments[random.randint(0, 2)]
+        self.fake_phone_number = random.randint(9347822912, 9947822913)
+        list_subjects = ["Hindi", "English", "Maths", "Physics", "Chemistry", "Biology", "Computer Science", "Commerce",
+                         "Accounting", "Economics", "Arts", "Social Studies", "History", "Civics"]
+        self.subject = list_subjects[random.randint(0, 13)]
 
 
 class TextBoxPage(Base):
     """сторінка Text Box: містить локатори веб елементів та методи для взаємодії з ними"""
     header = HeaderSection()
     menu = MenuBar()
-    fake = FakeData()
+    fake = Data()
 
     txt_full_name = 'input[id="userName"]'
     txt_email = 'input[id="userEmail"]'
@@ -222,8 +236,9 @@ class RadioButtonPage(Base):
 
 
 class WebTablesPage(Base):
+    """сторінка Web Tables: містить локатори веб елементів та методи для взаємодії з ними"""
     header = HeaderSection()
-    fake = FakeData()
+    fake = Data()
     email_fake = fake.fake_email
 
     btn_add = 'button[id="addNewRecordButton"]'
@@ -254,8 +269,8 @@ class WebTablesPage(Base):
         self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.txt_user_email).send_keys(WebTablesPage.email_fake)
         self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.txt_age).send_keys(WebTablesPage.fake.fake_age)
         self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.txt_salary).send_keys(WebTablesPage.fake.fake_salary)
-        self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.txt_department).send_keys(WebTablesPage.fake.fake_department)
-        return f'{WebTablesPage.fake.fake_first_name} {WebTablesPage.fake.fake_last_name} {WebTablesPage.fake.fake_age} {WebTablesPage.email_fake} {WebTablesPage.fake.fake_salary} {WebTablesPage.fake.fake_department}'
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.txt_department).send_keys(WebTablesPage.fake.department)
+        return f'{WebTablesPage.fake.fake_first_name} {WebTablesPage.fake.fake_last_name} {WebTablesPage.fake.fake_age} {WebTablesPage.email_fake} {WebTablesPage.fake.fake_salary} {WebTablesPage.fake.department}'
 
     def click_on_btn_submit(self):
         self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.btn_submit).click()
@@ -279,7 +294,7 @@ class WebTablesPage(Base):
         self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.btn_edit).click()
         user_email = self.wait_for_visibility_of_el(By.CSS_SELECTOR, WebTablesPage.txt_user_email)
         user_email.clear()
-        fake_data = FakeData()
+        fake_data = Data()
         user_email.send_keys(fake_data.fake_email)
         self.click_on_btn_submit()
         return fake_data.fake_email
@@ -308,6 +323,93 @@ class WebTablesPage(Base):
             actual_quantity_rows = self.wait_for_visibility_of_all_elements(By.CSS_SELECTOR, WebTablesPage.rows)
             list_of_counted_rows.append(str(len(actual_quantity_rows)))
         return list_of_clicked_options, list_of_counted_rows
+
+
+class FormsPage(Base):
+    """сторінка Forms"""
+    header = HeaderSection()
+    menu = MenuBar()
+
+
+class DataStateAndCity:
+    dict_state_city = {"NCR": ["Delhi", "Gurgaon", "Noida"], "Uttar Pradesh": ["Agra", "Lucknow", "Merrut"],
+                       "Haryana": ["Karnal", "Panipat"], "Rajasthan": ["Jaipur", "Jaiselmer"]}
+
+    list_states = list(dict_state_city.keys())
+    random_state = list_states[random.randint(0, 3)]
+
+    cities_in_the_random_state = dict_state_city[random_state]
+    length_of_the_cities_list = len(cities_in_the_random_state)
+    random_city = cities_in_the_random_state[random.randint(0, length_of_the_cities_list - 1)]
+
+
+class PracticeFormPage(Base):
+    """сторінка Practice Form: містить локатори веб елементів та методи для взаємодії з ними"""
+    header = HeaderSection()
+    fake = Data()
+
+    txt_first_name = '[id="firstName"]'
+    txt_last_name = '[id="lastName"]'
+    txt_email = '[id="userEmail"]'
+    radio_btn_gender = f'[for="gender-radio-{random.randint(1,3)}"]'
+    txt_mobile_number = '[id="userNumber"]'
+    date_of_birth = '[id="dateOfBirthInput"]'
+    txt_subjects = 'input[id="subjectsInput"]'
+    hobbies = f'[for="hobbies-checkbox-{random.randint(1,3)}"]'
+    picture = ''
+    txt_current_address = '[id="currentAddress"]'
+
+    select_state = 'div[id="state"]'
+    locator_input_state = 'input[id="react-select-3-input"]'
+    select_city = 'div[id="city"]'
+    locator_input_city = 'input[id="react-select-4-input"]'
+    btn_submit = '[id="submit"]'
+
+    result_table = '//tr/td[2]'
+
+    def set_student_registration_form(self):
+        """введення імені, прізвища, емейлу, №тел; вибір гендеру"""
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.txt_first_name).send_keys(PracticeFormPage.fake.fake_first_name)
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.txt_last_name).send_keys(PracticeFormPage.fake.fake_last_name)
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.txt_email).send_keys(PracticeFormPage.fake.fake_email)
+
+        wait_for_radio_btn_gender = self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.radio_btn_gender)
+        wait_for_radio_btn_gender.click()
+        chosen_gender = wait_for_radio_btn_gender.text
+
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.txt_mobile_number).send_keys(PracticeFormPage.fake.fake_phone_number)
+        """вибір предмету* """
+        self.helper(PracticeFormPage.txt_subjects, PracticeFormPage.fake.subject)
+        """вибір хоббі, введення адреси"""
+        wait_for_hobbies = self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.hobbies)
+        wait_for_hobbies.click()
+        chosen_hobby = wait_for_hobbies.text
+
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.txt_current_address).send_keys(PracticeFormPage.fake.fake_current_address)
+        """вибір штату* """
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.select_state).click()
+        self.helper(PracticeFormPage.locator_input_state, DataStateAndCity.random_state)
+        """вибір міста* """
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.select_city).click()
+        self.helper(PracticeFormPage.locator_input_city, DataStateAndCity.random_city)
+        """клік на кнпку submit"""
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, PracticeFormPage.btn_submit).click()
+        return PracticeFormPage.fake.fake_first_name, PracticeFormPage.fake.fake_last_name, PracticeFormPage.fake.fake_email, \
+               chosen_gender, str(PracticeFormPage.fake.fake_phone_number), PracticeFormPage.fake.subject, \
+               chosen_hobby, PracticeFormPage.fake.fake_current_address, DataStateAndCity.random_state, DataStateAndCity.random_city
+
+    def helper(self, locator, data):
+        """допоміжний метод для взаємодії з полями Subjects, State and City"""
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, locator).send_keys(data)
+        self.wait_for_visibility_of_el(By.CSS_SELECTOR, locator).send_keys(Keys.ENTER)
+
+    def get_data_result(self):
+        """цей метод повертає дані з підтверджувальної таблиці"""
+        table = self.wait_for_visibility_of_all_elements(By.XPATH, PracticeFormPage.result_table)
+        list_with_data_result = []
+        for i in table:
+            list_with_data_result.append(i.text)
+        return list_with_data_result
 
 
 class TestBase:
@@ -432,4 +534,37 @@ class TestElements(TestBase):
         list_of_clicked_options, list_of_counted_rows = web_tables_pg.quantity_of_rows()
         assert list_of_clicked_options == list_of_counted_rows
         # self.close_site()
+
+
+class TestForms(TestBase):
+    def test_practice_form(self):
+        self.open_site()
+        InitPage().click_on_btn_forms()
+        """відклилась стрінка Forms"""
+        forms_pg = FormsPage()
+        forms_pg_header_name = forms_pg.header.get_header_name()
+        assert forms_pg_header_name == "Forms"
+        forms_pg.menu.click_on_btn_practice_form()
+        """відклилась стрінка Practice Form"""
+        practice_form_pg = PracticeFormPage()
+        practice_form_pg_header_name = practice_form_pg.header.get_header_name()
+        assert practice_form_pg_header_name == 'Practice Form'
+
+        """видалення реклами в футері, що перекриває кнопку submit; заповнення форми реєстрації студента"""
+        practice_form_pg.remove_advertising_in_footer()
+        inp_first_name, inp_last_name, inp_email, inp_gender, inp_mobile, inp_subject, inp_hobby, inp_address, inp_state, inp_city = practice_form_pg.set_student_registration_form()
+
+        """дані з підтверджувальної таблиці"""
+        res_name, res_email, res_gender, res_mobile, res_date, res_subject, res_hobby, res_picture, res_address, res_state_and_city = practice_form_pg.get_data_result()
+
+        assert f'{inp_first_name} {inp_last_name}' == res_name, 'name error'
+        assert inp_email == res_email, 'email error'
+        assert inp_gender == res_gender, 'gender error'
+        assert inp_mobile == res_mobile, 'mobile error'
+        assert inp_subject == res_subject, 'subject error'
+        assert inp_hobby == res_hobby, 'hobby error'
+        assert inp_address == res_address, 'address error'
+        assert f'{inp_state} {inp_city}' == res_state_and_city, 'state/city error'
+        # self.close_site()
+
 
